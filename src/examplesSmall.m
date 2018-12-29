@@ -4,7 +4,8 @@
 %%  Simple example
 %
 f=@(x) [sin(x(1)) cos(x(2)) tan(x(1)*x(2))];
-JAD=full(AutoDiffJacobianAutoDiff(f,[1,1]))
+%f=@(x) sin(x(1))+cos(x(2))+tan(x(1)*x(2));
+JAD=full(AutoDiffJacobianAutoDiff(f,[1;1]))
 JFD=AutoDiffJacobianFiniteDiff(f,[1,1])
 JAD+i*JFD % comparing visualy using complex numbers
 fprintf('max abs difference = %e\n',full(max(abs(JAD(:)-JFD(:)))));

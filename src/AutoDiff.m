@@ -154,6 +154,13 @@ classdef AutoDiff
             x.values = log(x.values);
         end
         
+         function x = gammaln(x)
+            tmp=psi(x.values);
+            x.derivatives = AutoDiff.spdiag(tmp)* x.derivatives;
+            x.values = gammaln(x.values);
+        end
+        
+        
         function x = tanh(x)
             x.derivatives =AutoDiff.spdiag(1./(cosh(x.values).^2))* x.derivatives;
             x.values = tanh(x.values);
@@ -190,7 +197,7 @@ classdef AutoDiff
                     y.values=cat(dim,y.values,x);
                 else
                     y.values = cat(dim,y.values, x.values);
-                    if nderivs~=size(x.derivatives,2);
+                    if nderivs~=size(x.derivatives,2)
                         error('AutoDiff:NonUniformDerivatesNumber','The number of derivatives is not uniform');
                     end
                 end
@@ -464,8 +471,12 @@ classdef AutoDiff
             end
         end
         
-        function inv(~)
-            error('not coded yet')
+        function y=inv(x)
+            if all(size(x)==[3,3])
+             y.values=det(x.values);
+                y.derivatives=1;
+                y=AutoDiff(y.values,y.derivatives);    
+            end
         end                
         
         function z = mldivide(x, y)
@@ -896,6 +907,21 @@ classdef AutoDiff
                 y.values=det(x.values);
                 y.derivatives=[x.values(2,2),-x.values(1,2),-x.values(2,1),x.values(1,1)]*x.derivatives;
                 y=AutoDiff(y.values,y.derivatives);
+            else
+                if all(size(x)==[3,3])
+                y.values=det(x.values);
+                y.derivatives=[x.values(2,2)*x.values(3,3)-x.values(2,3)*x.values(3,2)...
+                   x.values(1,3)*x.values(3,2)-x.values(1,2)*x.values(3,3),...
+                   x.values(1,2)*x.values(2,3)-x.values(1,3)*x.values(2,2),...
+                   x.values(2,3)*x.values(3,1)-x.values(2,1)*x.values(3,3),...
+                   x.values(1,1)*x.values(3,3)-x.values(1,3)*x.values(3,1),...
+                   x.values(1,3)*x.values(2,1)-x.values(1,1)*x.values(2,3),...
+                   x.values(2,1)*x.values(3,2)-x.values(2,2)*x.values(3,1),...
+                   x.values(1,2)*x.values(3,1)-x.values(1,1)*x.values(3,2),...
+                   x.values(1,1)*x.values(2,2)-x.values(1,2)*x.values(2,1)]*...
+                   x.derivatives;
+                y=AutoDiff(y.values,y.derivatives);    
+                end
             end
         end
         
